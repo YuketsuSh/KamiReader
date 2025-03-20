@@ -35,6 +35,10 @@ class KamiReader {
         this.navigation.prevPage();
     }
 
+    public getCurrentPage(): void {
+        this.navigation.getCurrentPage();
+    }
+
     public setTheme(theme: ThemeConfig): void {
         this.uiManager.applyStyle(theme.color, theme.opacity);
     }

@@ -7,11 +7,12 @@ export class Renderer {
     private readonly container: HTMLElement;
     private readonly images: Record<number, string[]>;
     private readonly mode: RenderMode;
-    private currentPage: number = 1;
+    private currentPage: number;
 
-    constructor(container: HTMLElement, images: Record<number, string[]>, mode: RenderMode) {
+    constructor(container: HTMLElement, images: Record<number, string[]>, mode: RenderMode, initialPage: number = 1) {
         this.container = container;
         this.canvas = document.createElement("canvas");
+        this.ctx = this.canvas.getContext("2d");
 
         this.canvas.style.display = "block";
         this.canvas.style.position = "relative";
@@ -40,7 +41,8 @@ export class Renderer {
 
         this.images = images;
         this.mode = mode;
-        this.ctx = this.canvas.getContext("2d");
+        this.currentPage = images[initialPage] ? initialPage : 1;
+
         if (!this.ctx) throw new Error("Impossible d'initialiser Canvas2D.");
 
         if (mode === "single-page") {
@@ -59,6 +61,9 @@ export class Renderer {
         this.container.style.width = `${containerWidth}px`;
     }
 
+    /**
+     * 🔹 Rend une seule page (Mode `single-page`)
+     */
     private async renderPage(pageNumber: number): Promise<void> {
         this.ctx!.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -97,30 +102,34 @@ export class Renderer {
 
         this.container.style.width = `${this.canvas.width}px`;
         this.container.style.height = "auto";
+
+        window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
+    /**
+     * 🔹 Rend toutes les images de la page active (Mode `scroll`)
+     */
     private async renderAllImages(): Promise<void> {
+        this.ctx!.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        if (!this.images[this.currentPage] || !Array.isArray(this.images[this.currentPage])) {
+            console.error(`❌ Aucune image trouvée pour la page ${this.currentPage}`);
+            return;
+        }
+
         const loadedImages: ImageData[] = [];
         let totalHeight = 0;
         let maxWidth = 0;
 
-        for (const page of Object.keys(this.images)) {
-            const pageNumber = Number(page);
-            if (!this.images[pageNumber] || !Array.isArray(this.images[pageNumber])) continue;
+        for (const src of this.images[this.currentPage]) {
+            const img = await ImageLoader.loadImage(src);
+            loadedImages.push({ img, width: img.width, height: img.height });
 
-            for (const src of this.images[pageNumber]) {
-                const img = await ImageLoader.loadImage(src);
-                loadedImages.push({ img, width: img.width, height: img.height });
-
-                totalHeight += img.height;
-                if (img.width > maxWidth) maxWidth = img.width;
-            }
+            totalHeight += img.height;
+            if (img.width > maxWidth) maxWidth = img.width;
         }
 
-        if (loadedImages.length === 0) {
-            console.warn("⚠ Aucun contenu à afficher.");
-            return;
-        }
+        if (loadedImages.length === 0) return;
 
         const finalWidth = Math.min(this.container.clientWidth, 800);
         const scaleFactor = finalWidth / maxWidth;
@@ -138,23 +147,38 @@ export class Renderer {
 
         this.container.style.width = `${this.canvas.width}px`;
         this.container.style.height = "auto";
+
+        window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
+    /**
+     * ⏭ Passe à la page suivante
+     */
     public nextPage(): void {
-        if (this.mode === "scroll") return;
         if (this.images[this.currentPage + 1]) {
             this.currentPage++;
-            this.renderPage(this.currentPage);
+            if (this.mode === "single-page") {
+                this.renderPage(this.currentPage);
+            } else {
+                this.renderAllImages();
+            }
         }
     }
 
+    /**
+     * ⏮ Revient à la page précédente
+     */
     public prevPage(): void {
-        if (this.mode === "scroll") return;
         if (this.currentPage > 1) {
             this.currentPage--;
-            this.renderPage(this.currentPage);
+            if (this.mode === "single-page") {
+                this.renderPage(this.currentPage);
+            } else {
+                this.renderAllImages();
+            }
         }
     }
+
 
     public getCurrentPage(): number {
         return this.currentPage;

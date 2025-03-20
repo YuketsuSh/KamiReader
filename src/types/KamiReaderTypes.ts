@@ -5,6 +5,7 @@ export interface KamiReaderConfig {
     images: Record<number, string[]>;
     mode?: RenderMode;
     showNavbar?: boolean;
+    initialPage?: number;
 }
 
 export interface ThemeConfig {

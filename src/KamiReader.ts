@@ -11,7 +11,7 @@ class KamiReader {
     private readonly mode: RenderMode;
 
     constructor(config: KamiReaderConfig) {
-        const { containerId, images, mode = "scroll", showNavbar = true } = config;
+        const { containerId, images, mode = "scroll", showNavbar = true, initialPage = 1 } = config;
 
         const container = document.getElementById(containerId);
         if (!container) throw new Error(`❌ Élément #${containerId} introuvable`);
@@ -20,11 +20,11 @@ class KamiReader {
 
         this.container = container;
         this.mode = mode;
-        this.renderer = new Renderer(this.container, images, this.mode);
+        this.renderer = new Renderer(this.container, images, this.mode, initialPage);
         this.uiManager = new UIManager(this.container);
-        this.navigation = new Navigation(this.renderer, images, this.mode, showNavbar);
+        this.navigation = new Navigation(this.renderer, images, this.mode, showNavbar, initialPage);
 
-        console.log("🚀 KamiReader initialisé avec le mode:", this.mode);
+        console.log(`🚀 KamiReader initialisé en mode "${this.mode}" à la page ${initialPage}`);
     }
 
     public nextPage(): void {

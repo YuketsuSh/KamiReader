@@ -4,16 +4,17 @@ import { RenderMode } from "../types/KamiReaderTypes";
 export class Navigation {
     private readonly renderer: Renderer;
     private readonly images: Record<number, string[]>;
-    private currentPage: number = 0;
+    private currentPage: number;
     private readonly mode: RenderMode;
     private readonly navBar?: HTMLElement;
     private readonly prevBtn?: HTMLButtonElement;
     private readonly nextBtn?: HTMLButtonElement;
 
-    constructor(renderer: Renderer, images: Record<number, string[]>, mode: RenderMode, showNavBar: boolean) {
+    constructor(renderer: Renderer, images: Record<number, string[]>, mode: RenderMode, showNavBar: boolean, initialPage: number = 1) {
         this.renderer = renderer;
         this.images = images;
         this.mode = mode;
+        this.currentPage = images[initialPage] ? initialPage : 1;
 
         if (showNavBar) {
             this.navBar = document.createElement("div");

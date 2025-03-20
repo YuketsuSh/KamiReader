@@ -18,7 +18,19 @@ npm install kamireader
 ```
 ```ts
 import KamiReader from "kamireader";
-KamiReader.init("#reader-container", { theme: "dark" });
+const reader = new KamiReader({
+    containerId: "reader-container",
+    theme: "dark",
+    images: {
+        1: ["page1.jpg"],
+        2: ["page2.jpg"],
+    },
+    mode: "single-page", // "single-page" | "scroll"
+    initialPage: 1, // Facultatif (par défaut : 1)
+    showNavbar: true, // Affiche la barre de navigation
+});
+
+reader.init();
 ```
 
 ### 2️⃣ **Via CDN**
@@ -27,23 +39,30 @@ Ajoutez simplement ce script dans votre HTML :
 <script src="https://cdn.velyorix.com/kamireader.min.js"></script>
 <div id="reader"></div>
 <script>
-  KamiReader.init("#reader", { theme: "light" });
+    const reader = new KamiReader({
+        containerId: "reader",
+        images: {
+            1: ["page1.jpg"],
+            2: ["page2.jpg"],
+        },
+        mode: "scroll",
+    });
+    reader.init();
 </script>
 ```
 
 ---
 
 ## 🎨 Personnalisation
-KamiReader est entièrement personnalisable :
-```ts
-KamiReader.init("#reader", {
-  theme: "dark",
-  pageMode: "single", // "single" | "double" | "scroll"
-  controls: true, // Affiche ou cache les contrôles
-});
-```
-Plus d’options disponibles dans la [documentation](./docs).
+KamiReader propose plusieurs options pour s’adapter à vos besoins :
 
+| Option          | Type               | Description |
+|----------------|--------------------|-------------|
+| `containerId`  | `string`           | ID du conteneur où afficher le lecteur. |
+| `images`       | `Record<number, string[]>` | Images à afficher, classées par numéro de page. |
+| `mode`         | `"single-page"` \| `"scroll"` | Mode d’affichage des pages. |
+| `initialPage`  | `number` _(facultatif)_ | Page affichée au démarrage (par défaut : `1`). |
+| `showNavbar`   | `boolean` _(facultatif)_ | Affiche la barre de navigation (par défaut : `true`). |
 ---
 
 ## 📖 Documentation

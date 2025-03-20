@@ -2,8 +2,9 @@ export type RenderMode = "single-page" | "scroll";
 
 export interface KamiReaderConfig {
     containerId: string;
-    images: string[];
+    images: Record<number, string[]>;
     mode?: RenderMode;
+    showNavbar?: boolean;
 }
 
 export interface ThemeConfig {
